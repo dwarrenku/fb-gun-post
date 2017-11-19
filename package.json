@@ -1,0 +1,24 @@
+{
+  "name": "guns_kill_people",
+  "version": "1.0.0",
+  "description": "an app that will post summaries of the gun violence in one day",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "assert": "^1.4.1",
+    "cheerio": "^1.0.0-rc.2",
+    "dotenv": "^4.0.0",
+    "express": "^4.16.2",
+    "https": "^1.0.0",
+    "moment": "^2.19.2",
+    "mongodb": "^2.2.33",
+    "node-schedule": "^1.2.5",
+    "promise": "^8.0.1",
+    "querystring": "^0.2.0",
+    "request": "^2.83.0"
+  }
+}
