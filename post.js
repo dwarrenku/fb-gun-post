@@ -1,12 +1,14 @@
 var https = require('https');
 var querystring = require('querystring');
 var db = require('./db.js');
+var moment = require('moment');
 
 module.exports.post = function() {
   console.log("------------starting posts------------");
   db.getUsers(function(err, users) {
     db.getStats(function(err, stats) {
-      if (err != null && stats.incidents > 0) {
+      // if (err != null && stats.incidents > 0) 
+      {
         users.forEach(function(u) {
           console.log("posting to: " + u.facebookId);
           var today = moment().format('MMMM Do') + ": ";
