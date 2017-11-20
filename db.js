@@ -12,8 +12,9 @@ module.exports.getStats = function(callback) {
     assert.equal(null, err);
     var start = moment().startOf('day').toDate();
     var end = moment().endOf('day').toDate();
-    var killed = 0;
-    var injured = 0;
+    console.log("start: " + start);
+    console.log("end  : " + end);
+    var killed = 0, injured = 0, incidents = 0;
     var collection = db.collection('documents');
     var cursor = collection.find({
       date: {
@@ -27,12 +28,17 @@ module.exports.getStats = function(callback) {
       if (item != null) {
         killed += item.Killed;
         injured += item.Injured;
+        incidents++;
       } else {
-        callback(null, {killed : killed, injured : injured});
+        callback(null, {
+          killed: killed,
+          injured: injured,
+          incidents: incidents
+        });
       }
+      db.close();
     });
 
-    db.close();
   });
 }
 

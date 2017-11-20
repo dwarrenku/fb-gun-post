@@ -6,18 +6,23 @@ module.exports.post = function() {
   console.log("------------starting posts------------");
   db.getUsers(function(err, users) {
     db.getStats(function(err, stats) {
-      users.forEach(function(u) {
-        console.log("posting to: " + u.facebookId);
-        var message = "Today, In the United States, at least " + stats.killed + " people were killed and " +
-          stats.injured + " people were injured by the use of a gun.";
-        postToFB(u.accessToken, u.facebookId, message, function(err, res) {
-          if (err)
-            console.log("error: " + JSON.toString(error));
-          else {
-            console.log("success: " + JSON.toString(res));
-          }
-        })
-      });
+      if (err != null && stats.incidents > 0) {
+        users.forEach(function(u) {
+          console.log("posting to: " + u.facebookId);
+          var today = moment().format('MMMM Do') + ": ";
+          var message = today + "\r\n" +
+                        stats.incidents + " instances of violence.\r\n" +
+                        "At least " + stats.killed + " people were killed and " +
+                        stats.injured + " people were injured by the use of a gun.";
+          postToFB(u.accessToken, u.facebookId, message, function(err, res) {
+            if (err)
+              console.log("error: " + JSON.toString(error));
+            else {
+              console.log("success: " + JSON.toString(res));
+            }
+          })
+        });
+      }
     });
   });
 }

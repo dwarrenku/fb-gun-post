@@ -8,7 +8,7 @@ var schedule = require('node-schedule');
 var app = express();
 
 schedule.scheduleJob('0 */10 * * * *', db.scrape);
-schedule.scheduleJob('0 0 0 21 * *', fb.post);
+schedule.scheduleJob('0 0 21 * * *', fb.post);
 
 
 //the facebook oAuth stuff is in here
@@ -29,12 +29,8 @@ app.get('/scrape', function(req, res) {
   res.send("done");
 });
 
-app.get('/test', function(req, res) {
-  db.getStats(function(err, count) {});
-});
-
 app.get('/post', function(req, res) {
   fb.post();
 })
 
-app.listen(8080);
+app.listen(8080,'localhost');

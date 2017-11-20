@@ -19,7 +19,7 @@ module.exports.init = function(app) {
   passport.use(new FacebookStrategy({
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: "http://localhost:8000/auth/facebook/callback"
+      callbackURL: "http://guns-kill-people.org/facebook/auth/callback"
     },
     function(accessToken, refreshToken, profile, done) {
       User.update({
@@ -61,7 +61,7 @@ module.exports.init = function(app) {
       res.redirect('/');
     }
   );
-  
+
   app.get('/authfailed', function(req, res) {
     res.sendFile(__dirname + '/fail.html');
   });
