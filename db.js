@@ -10,11 +10,13 @@ var url = 'mongodb://localhost:27017/fb';
 module.exports.getStats = function(callback) {
   MongoClient.connect(url, function(err, db) {
     assert.equal(null, err);
-    var start = moment().startOf('day').toDate();
+    var start = moment().startOf('day').subtract(3,'days').toDate();
     var end = moment().endOf('day').toDate();
     console.log("start: " + start);
     console.log("end  : " + end);
-    var killed = 0, injured = 0, incidents = 0;
+    var killed = 0,
+      injured = 0,
+      incidents = 0;
     var collection = db.collection('documents');
     var cursor = collection.find({
       date: {
@@ -55,68 +57,84 @@ module.exports.getUsers = function(callback) {
 }
 
 module.exports.scrape = function() {
-  request('http://www.gunviolencearchive.org/last-72-hours', function(err, resp, body) {
-    console.log('error:', err); // Print the error if one occurred
-    console.log('statusCode:', resp && resp.statusCode); // Print the response status code if a response was received
+  var pages = [
+    'http://www.gunviolencearchive.org/last-72-hours',
+    'http://www.gunviolencearchive.org/last-72-hours?page=1',
+    'http://www.gunviolencearchive.org/last-72-hours?page=2',
+    'http://www.gunviolencearchive.org/last-72-hours?page=3',
+    'http://www.gunviolencearchive.org/last-72-hours?page=4',
+    'http://www.gunviolencearchive.org/last-72-hours?page=5',
+    'http://www.gunviolencearchive.org/last-72-hours?page=6',
+    'http://www.gunviolencearchive.org/last-72-hours?page=7',
+    'http://www.gunviolencearchive.org/last-72-hours?page=8',
+    'http://www.gunviolencearchive.org/last-72-hours?page=9'
+  ];
 
-    if (err)
-      throw err;
-    $ = cheerio.load(body);
+  pages.forEach((page) => {
 
-    var headers = [];
-    var rows = [];
+    request(page, function(err, resp, body) {
+      console.log('error:', err); // Print the error if one occurred
+      console.log('statusCode:', resp && resp.statusCode); // Print the response status code if a response was received
 
-    $("table").find("thead th").each(function() {
-      var str = $(this).text();
-      if (str.includes("#"))
-        str = str.substring(str.indexOf("#") + 2)
-      else if (str.toLowerCase().includes("city"))
-        str = "CityState";
-      else if (str.toLowerCase().includes("date"))
-        str = "date";
-      else if (str.toLowerCase().includes("operations"))
-        str = "Links";
-      headers.push(str);
-    });
+      if (err)
+        throw err;
+      $ = cheerio.load(body);
 
-    //for each row
-    $("table").find("tbody tr").each(function() {
-      var obj = {};
-      //for each cell in row
-      $(this).find("td").each(function(i, elem) {
-        if (headers[i] === "date")
-          obj[headers[i]] = moment($(this).text(), "MMMM D, YYYY").toDate();
-        //if there are links, store them as links
-        else if (headers[i] === "Links") {
-          var links = [];
-          $(this).find("a").each(function() {
-            links.push($(this).attr('href'));
-          })
-          obj[headers[i]] = links;
-        } else if (headers[i] === "Killed" || headers[i] === "Injured") {
-          obj[headers[i]] = Number($(this).text());
-        } else { // if it isn't a link, store it as text
-          obj[headers[i]] = $(this).text();
-        }
+      var headers = [];
+      var rows = [];
+
+      $("table").find("thead th").each(function() {
+        var str = $(this).text();
+        if (str.includes("#"))
+          str = str.substring(str.indexOf("#") + 2)
+        else if (str.toLowerCase().includes("city"))
+          str = "CityState";
+        else if (str.toLowerCase().includes("date"))
+          str = "date";
+        else if (str.toLowerCase().includes("operations"))
+          str = "Links";
+        headers.push(str);
       });
-      rows.push(obj);
-    });
 
-    console.log(rows[0].Links[0]);
-    //console.log(JSON.stringify(rows));
-
-    MongoClient.connect(url, function(err, db) {
-      assert.equal(null, err);
-      var collection = db.collection('documents');
-      // Insert some documents
-      rows.forEach((d) => {
-        collection.update({
-          "Links.0": d.Links[0]
-        }, d, {
-          upsert: true
+      //for each row
+      $("table").find("tbody tr").each(function() {
+        var obj = {};
+        //for each cell in row
+        $(this).find("td").each(function(i, elem) {
+          if (headers[i] === "date")
+            obj[headers[i]] = moment($(this).text(), "MMMM D, YYYY").toDate();
+          //if there are links, store them as links
+          else if (headers[i] === "Links") {
+            var links = [];
+            $(this).find("a").each(function() {
+              links.push($(this).attr('href'));
+            })
+            obj[headers[i]] = links;
+          } else if (headers[i] === "Killed" || headers[i] === "Injured") {
+            obj[headers[i]] = Number($(this).text());
+          } else { // if it isn't a link, store it as text
+            obj[headers[i]] = $(this).text();
+          }
         });
+        rows.push(obj);
       });
-      db.close();
+
+      console.log(rows[0].Links[0]);
+      //console.log(JSON.stringify(rows));
+
+      MongoClient.connect(url, function(err, db) {
+        assert.equal(null, err);
+        var collection = db.collection('documents');
+        // Insert some documents
+        rows.forEach((d) => {
+          collection.update({
+            "Links.0": d.Links[0]
+          }, d, {
+            upsert: true
+          });
+        });
+        db.close();
+      });
     });
   });
 }

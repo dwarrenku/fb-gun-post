@@ -7,18 +7,19 @@ module.exports.post = function() {
   console.log("------------starting posts------------");
   db.getUsers(function(err, users) {
     db.getStats(function(err, stats) {
-      // if (err != null && stats.incidents > 0) 
+      console.log(stats);
+      if (err != null && stats.incidents > 0)
       {
         users.forEach(function(u) {
           console.log("posting to: " + u.facebookId);
-          var today = moment().format('MMMM Do') + ": ";
+          var today = moment().format('MMMM Do') + ": In the past 72 hours.";
           var message = today + "\r\n" +
                         stats.incidents + " instances of violence.\r\n" +
                         "At least " + stats.killed + " people were killed and " +
                         stats.injured + " people were injured by the use of a gun.";
           postToFB(u.accessToken, u.facebookId, message, function(err, res) {
             if (err)
-              console.log("error: " + JSON.toString(error));
+              console.log("error: " + JSON.toString(err));
             else {
               console.log("success: " + JSON.toString(res));
             }

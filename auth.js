@@ -19,7 +19,7 @@ module.exports.init = function(app) {
   passport.use(new FacebookStrategy({
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: "http://guns-kill-people.org/facebook/auth/callback"
+      callbackURL: "http://guns-kill-people.org/auth/facebook/callback"
     },
     function(accessToken, refreshToken, profile, done) {
       User.update({
