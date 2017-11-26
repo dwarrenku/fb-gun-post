@@ -15,7 +15,7 @@ module.exports.post = function() {
         else {
           if (stats.incidents > 0) {
           console.log(stats);
-          var today = moment().format('MMMM Do') + ": In the past 72 hours.";
+          var today = moment().format('MMMM Do') + "\r\nIn the past 72 hours:";
           var message = today + "\r\n" +
             stats.incidents + " instances of violence.\r\n" +
             "At least " + stats.killed + " people were killed and " +
