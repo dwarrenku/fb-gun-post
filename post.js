@@ -6,27 +6,36 @@ var moment = require('moment');
 module.exports.post = function() {
   console.log("------------starting posts------------");
   db.getUsers(function(err, users) {
-    db.getStats(function(err, stats) {
-      console.log(stats);
-      if (err != null && stats.incidents > 0)
-      {
-        users.forEach(function(u) {
-          console.log("posting to: " + u.facebookId);
+    if (err)
+      console.log("Failed getting users for post");
+    else
+      db.getStats(function(err, stats) {
+        if (err)
+          console.log("Failed getting stats");
+        else {
+          if (stats.incidents > 0) {
+          console.log(stats);
           var today = moment().format('MMMM Do') + ": In the past 72 hours.";
           var message = today + "\r\n" +
-                        stats.incidents + " instances of violence.\r\n" +
-                        "At least " + stats.killed + " people were killed and " +
-                        stats.injured + " people were injured by the use of a gun.";
-          postToFB(u.accessToken, u.facebookId, message, function(err, res) {
-            if (err)
-              console.log("error: " + JSON.toString(err));
-            else {
-              console.log("success: " + JSON.toString(res));
-            }
-          })
-        });
-      }
-    });
+            stats.incidents + " instances of violence.\r\n" +
+            "At least " + stats.killed + " people were killed and " +
+            stats.injured + " people were injured by the use of a gun.";
+          console.log(message);
+            users.forEach(function(u) {
+              console.log("posting to: " + u.facebookId);
+              postToFB(u.accessToken, u.facebookId, message, function(err, res) {
+                console.log(err);
+                console.log(res);
+                if (err)
+                  console.log("error: " + JSON.toString(err));
+                else {
+                  console.log("success: " + JSON.toString(res));
+                }
+              })
+            });
+          }
+        }
+      });
   });
 }
 
