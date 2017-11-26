@@ -14,13 +14,6 @@ app.use(helmet.hsts({
   maxAge: sixtyDaysInSeconds
 }));
 
-app.use(function(req, res, next) {
-  if(!req.secure) {
-    return res.redirect(['https://', req.get('Host'), req.url].join(''));
-  }
-  next();
-});
-
 
 schedule.scheduleJob('0 59 * * * *', db.scrape);
 schedule.scheduleJob('0 0 21 * * *', fb.post);
@@ -53,5 +46,17 @@ app.get('/post', function(req, res) {
   res.send("done");
 })
 
-app.listen(80,'localhost');
+app.all('*', ensureSecure); // at top of routing calls
+
+function ensureSecure(req, res, next){
+  if(req.secure){
+    // OK, continue
+    return next();
+  };
+  // handle port numbers if you need non defaults
+  // res.redirect('https://' + req.host + req.url); // express 3.x
+  res.redirect('https://' + req.hostname + req.url); // express 4.x
+}
+
+app.createServer(app).listen(80);
 https.createServer(options, app).listen(443);
