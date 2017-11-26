@@ -1,6 +1,6 @@
 var express = require("express");
 var https = require("https");
-var helmet = require('helmet');
+var http = require("http");
 var fs = require("fs");
 var db = require('./db.js');
 var fb = require('./post.js');
@@ -9,18 +9,32 @@ var auth = require('./auth.js');
 var schedule = require('node-schedule');
 var app = express();
 
-var sixtyDaysInSeconds = 5184000
-app.use(helmet.hsts({
-  maxAge: sixtyDaysInSeconds
-}))
-
 schedule.scheduleJob('0 59 * * * *', db.scrape);
 schedule.scheduleJob('0 0 21 * * *', fb.post);
 
-var options = {
+var useHttps = true;
+var httpApp = null,
+  httpsApp = null;
+
+if (useHttps) {
+  // if you want to redirect to https, you HTTP service must be empty and have only this middleware
+  httpApp = http.createServer(function(req, res) {
+    res.writeHead(301, {
+      "Location": "https://" + req.headers.host + req.url
+    });
+    res.end();
+  });
+
+  var options = {
     cert: fs.readFileSync('./sslcert/fullchain.pem'),
     key: fs.readFileSync('./sslcert/privkey.pem')
-};
+  };
+  httpsApp = https.createServer(options, app);
+  httpsApp.listen(443);
+} else {
+  httpApp = http.createServer(app);
+  httpApp.listen(80);
+}
 
 //the facebook oAuth stuff is in here
 auth.init(app);
@@ -44,6 +58,3 @@ app.get('/post', function(req, res) {
   fb.post();
   res.send("done");
 })
-
-app.listen(80,'localhost');
-https.createServer(options, app).listen(443);
