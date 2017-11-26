@@ -1,6 +1,7 @@
 var express = require("express");
 var https = require("https");
 var helmet = require('helmet');
+var secure = require('express-force-https');
 var fs = require("fs");
 var db = require('./db.js');
 var fb = require('./post.js');
@@ -8,7 +9,8 @@ require('dotenv').config();
 var auth = require('./auth.js');
 var schedule = require('node-schedule');
 var app = express();
-app.use(helmet())
+app.use(helmet());
+app.use(secure);
 
 var options = {
     cert: fs.readFileSync('./sslcert/fullchain.pem'),
@@ -42,5 +44,5 @@ app.get('/post', function(req, res) {
   res.send("done");
 })
 
-app.listen(8080,'localhost');
-https.createServer(options, app).listen(8443);
+app.listen(80,'localhost');
+https.createServer(options, app).listen(443);
