@@ -1,4 +1,5 @@
 var express = require("express");
+var bodyParser = require ("bodyParser");
 var https = require("https");
 var http = require("http");
 var fs = require("fs");
@@ -18,9 +19,9 @@ var options = {
 
 var app = express();
 var server = http.createServer(app);
-var secureServer = https.createServer(ssl_options, app);
+var secureServer = https.createServer(options, app);
 
-app.use(express.bodyParser());
+app.use(bodyParser.urlencoded());
 app.use(forceSSL);
 app.use(app.router);
 
