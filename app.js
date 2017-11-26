@@ -1,5 +1,4 @@
 var express = require("express");
-var bodyParser = require ("bodyParser");
 var https = require("https");
 var http = require("http");
 var fs = require("fs");
@@ -18,15 +17,18 @@ var options = {
 };
 
 var app = express();
-var server = http.createServer(app);
-var secureServer = https.createServer(options, app);
 
-app.use(bodyParser.urlencoded());
-app.use(forceSSL);
-app.use(app.router);
+app.use(function(req, res, next) {
+  if (!/https/.test(req.protocol)) {
+    res.redirect("https://" + req.headers.host + req.url);
+  } else {
+    return next();
+  }
+});
 
-secureServer.listen(443);
-server.listen(80);
+var webServer = app.listen(443, function() {
+  console.log('Listening on port %d', webServer.address().port);
+});
 
 //the facebook oAuth stuff is in here
 auth.init(app);
