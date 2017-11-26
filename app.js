@@ -7,34 +7,25 @@ var fb = require('./post.js');
 require('dotenv').config();
 var auth = require('./auth.js');
 var schedule = require('node-schedule');
-var app = express();
 
 schedule.scheduleJob('0 59 * * * *', db.scrape);
 schedule.scheduleJob('0 0 21 * * *', fb.post);
 
-var useHttps = true;
-var httpApp = null,
-  httpsApp = null;
+var options = {
+  cert: fs.readFileSync('./sslcert/fullchain.pem'),
+  key: fs.readFileSync('./sslcert/privkey.pem')
+};
 
-if (useHttps) {
-  // if you want to redirect to https, you HTTP service must be empty and have only this middleware
-  httpApp = http.createServer(function(req, res) {
-    res.writeHead(301, {
-      "Location": "https://" + req.headers.host + req.url
-    });
-    res.end();
-  });
+var app = express();
+var server = http.createServer(app);
+var secureServer = https.createServer(ssl_options, app);
 
-  var options = {
-    cert: fs.readFileSync('./sslcert/fullchain.pem'),
-    key: fs.readFileSync('./sslcert/privkey.pem')
-  };
-  httpsApp = https.createServer(options, app);
-  httpsApp.listen(443);
-} else {
-  httpApp = http.createServer(app);
-  httpApp.listen(80);
-}
+app.use(express.bodyParser());
+app.use(forceSSL);
+app.use(app.router);
+
+secureServer.listen(443);
+server.listen(80);
 
 //the facebook oAuth stuff is in here
 auth.init(app);
