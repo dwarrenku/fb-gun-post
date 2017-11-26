@@ -11,9 +11,13 @@ var app = express();
 
 app.use(helmet());
 
-schedule.scheduleJob('0 */10 * * * *', db.scrape);
+schedule.scheduleJob('0 59 * * * *', db.scrape);
 schedule.scheduleJob('0 0 21 * * *', fb.post);
 
+var options = {
+    cert: fs.readFileSync('./sslcert/fullchain.pem'),
+    key: fs.readFileSync('./sslcert/privkey.pem')
+};
 
 //the facebook oAuth stuff is in here
 auth.init(app);
@@ -35,6 +39,7 @@ app.get('/scrape', function(req, res) {
 
 app.get('/post', function(req, res) {
   fb.post();
+  res.send("done");
 })
 
 app.listen(80,'localhost');
