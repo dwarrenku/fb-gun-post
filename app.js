@@ -9,7 +9,18 @@ var auth = require('./auth.js');
 var schedule = require('node-schedule');
 var app = express();
 
-app.use(helmet());
+var sixtyDaysInSeconds = 5184000
+app.use(helmet.hsts({
+  maxAge: sixtyDaysInSeconds
+}));
+
+app.use(function(req, res, next) {
+  if(!req.secure) {
+    return res.redirect(['https://', req.get('Host'), req.url].join(''));
+  }
+  next();
+});
+
 
 schedule.scheduleJob('0 59 * * * *', db.scrape);
 schedule.scheduleJob('0 0 21 * * *', fb.post);
