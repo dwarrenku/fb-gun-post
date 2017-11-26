@@ -1,7 +1,6 @@
 var express = require("express");
 var https = require("https");
 var helmet = require('helmet');
-var secure = require('express-force-https');
 var fs = require("fs");
 var db = require('./db.js');
 var fb = require('./post.js');
@@ -9,15 +8,10 @@ require('dotenv').config();
 var auth = require('./auth.js');
 var schedule = require('node-schedule');
 var app = express();
+
 app.use(helmet());
-app.use(secure);
 
-var options = {
-    cert: fs.readFileSync('./sslcert/fullchain.pem'),
-    key: fs.readFileSync('./sslcert/privkey.pem')
-};
-
-schedule.scheduleJob('0 59 * * * *', db.scrape);
+schedule.scheduleJob('0 */10 * * * *', db.scrape);
 schedule.scheduleJob('0 0 21 * * *', fb.post);
 
 
@@ -41,7 +35,6 @@ app.get('/scrape', function(req, res) {
 
 app.get('/post', function(req, res) {
   fb.post();
-  res.send("done");
 })
 
 app.listen(80,'localhost');
