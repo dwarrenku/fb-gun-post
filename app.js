@@ -9,7 +9,6 @@ var auth = require('./auth.js');
 var schedule = require('node-schedule');
 var app = express();
 app.use(helmet());
-app.use(secure);
 
 var options = {
     cert: fs.readFileSync('./sslcert/fullchain.pem'),
