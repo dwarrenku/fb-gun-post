@@ -158,3 +158,28 @@ body {
     width: 42rem;
   }
 }
+
+#fade7 {
+  opacity: 0.05;
+}
+#fade6 {
+  opacity: 0.10;
+}
+#fade5 {
+  opacity: 0.20;
+}
+#fade4 {
+  opacity: 0.40;
+}
+#fade3 {
+  opacity: 0.60;
+}
+#fade2 {
+  opacity: 0.80;
+}
+#fade1 {
+  opacity: 0.9;
+}
+#fade0 {
+  opacity: 1;
+}
