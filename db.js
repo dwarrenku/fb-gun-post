@@ -10,7 +10,7 @@ var url = 'mongodb://localhost:27017/fb';
 module.exports.getStats = function(callback) {
   MongoClient.connect(url, function(err, db) {
     assert.equal(null, err);
-    var start = moment().startOf('day').subtract(3,'days').toDate();
+    var start = moment().startOf('day').subtract(2,'days').toDate();
     var end = moment().endOf('day').toDate();
     console.log("start: " + start);
     console.log("end  : " + end);
